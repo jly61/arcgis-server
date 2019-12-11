@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Weathers = require('../models/weathers');
-const Dbs = require('../models/dbs');
+const Dbs = require('../models/rices');
 
 
 // 查询每小时气温
@@ -144,7 +144,7 @@ router.get('/dayRain', function (req, res, next) {
 });
 
 
-//kriging插值多表查询每小时气温
+//kriging插值多表查询日平均气温，日总降雨量
 router.get('/kri-hour', (req, res, next) => {
     let year = 2019;
     let month = parseInt(req.query.month);
@@ -175,6 +175,55 @@ router.get('/kri-hour', (req, res, next) => {
                 // 'lat': 1,
                 'docs': 1,
                 '_id': 0
+            }
+        },
+        {
+            $sort: {TEM: -1}//根据TEM排序
+        }
+    ], (err, doc) => {
+        res.json({
+            result: doc
+        })
+        console.log(doc);
+    })
+});
+
+router.get('/kri-day', (req, res, next) => {
+    let year = 2019;
+    let month = parseInt(req.query.month);
+    let day = parseInt(req.query.day);
+    Weathers.aggregate([
+        {
+            $match: {Year: year, Mon: month, Day: day}
+        },
+        {
+            $lookup: {
+                from: 'station_info',
+                localField: 'Station_Id_C',
+                foreignField: 'Station_Id_C',
+                as: 'docs'
+            }
+        },
+        //多表多条件
+        // {
+        //     $match: {'docs.Station_Id_C': '56038'}
+        // },
+        {
+            $project: {
+                'Station_Id_C': 1,
+                'TEM': 1,
+                'PRE_1h': 1,
+                // 'lat': 1,
+                'docs': 1,
+                '_id': 0
+            }
+        },
+        {
+            $group: {
+                _id: "$Station_Id_C", //分组依据
+                avgTemp: {$avg: "$TEM" },
+                sumPre: {$sum: "$PRE_1h" },
+                other: { $first: "$docs" }
             }
         }
     ], (err, doc) => {
@@ -260,7 +309,57 @@ router.get('/hourPre', (req, res, next) => {
                 'docs.PRE_1h': 1,
                 '_id': 0
             }
-        }
+        },
+    ], (err, doc) => {
+        console.log(doc.length);
+        res.json({
+            result: doc
+        })
+    })
+});
+
+// geojson与weather表联合查询日平均气温
+router.get('/kri-day', (req, res, next) => {
+    let year = 2019;
+    let month = parseInt(req.query.month);
+    let day = parseInt(req.query.day);
+    Dbs.aggregate([
+        // {
+        //     $match: {Station_Id_C: '56172'}
+        // },
+        {
+            $lookup: {
+                from: 'hour_06260702',
+                localField: 'Station_Id_C',
+                foreignField: 'Station_Id_C',
+                as: 'docs'
+            }
+        },
+        {
+            $unwind: "$docs"
+        },
+        //多表多条件
+        {
+            $match: {'docs.Year': year, 'docs.Mon': month, 'docs.Day': day}
+        },
+        {
+            $project: {
+                'name': 1,
+                'Station_Id_C': 1,
+                'coordinates': 1,
+                'docs.TEM': 1,
+                '_id': 0
+            }
+        },
+        {
+            $group: {
+                _id: "$name", //分组依据
+                Station_Id_C: {$first: "$Station_Id_C"},
+                coordinates: {$first: "$coordinates"},
+                // avgTemp: {$avg: "$docs.TEM"}, //统计TEM
+                avgTemp: {$avg: "$docs.TEM"}, //统计TEM
+            }
+        },
     ], (err, doc) => {
         console.log(doc.length);
         res.json({

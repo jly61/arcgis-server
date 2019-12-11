@@ -13,7 +13,6 @@ const weatherSchema = new Schema({
     'TEM_Min': Number,
     'RHU': Number,
     'PRE_1h': Number,
-    'windpower': Number
 });
 
 module.exports = mongoose.model('hour_06260702', weatherSchema,'hour_06260702');

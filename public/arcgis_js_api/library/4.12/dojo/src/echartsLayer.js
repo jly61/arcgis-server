@@ -74,7 +74,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "esri/geometry/Point", "esri/ge
 				box.style.top = 0;
 				box.style.left = 0;
 				let parent = document.getElementsByClassName("esri-view-surface")[0];
-				console.log(box)
 				parent.appendChild(box);
 				this.chart = echarts.init(box);
 				//this.setCharts();
@@ -99,9 +98,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "esri/geometry/Point", "esri/ge
 			/*监听地图事件，根据图层是否显示，判断是否重绘echarts*/
 			startMapEventListeners:function() {
 				let view=this.view;
+				console.log(this)
 				view.watch("extent",lang.hitch(this,function () {
-
-
 					if(!this.visible) return;
 					this.setCharts();
 					this.chart.resize();
