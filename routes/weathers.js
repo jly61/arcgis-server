@@ -172,7 +172,8 @@ router.get('/kri-hour', (req, res, next) => {
                 'Station_Id_C': 1,
                 'TEM': 1,
                 'PRE_1h': 1,
-                // 'lat': 1,
+                'RHU': 1,
+                'PRS': 1,
                 'docs': 1,
                 '_id': 0
             }
@@ -213,7 +214,8 @@ router.get('/kri-day', (req, res, next) => {
                 'Station_Id_C': 1,
                 'TEM': 1,
                 'PRE_1h': 1,
-                // 'lat': 1,
+                'RHU': 1,
+                'PRS': 1,
                 'docs': 1,
                 '_id': 0
             }
@@ -223,6 +225,8 @@ router.get('/kri-day', (req, res, next) => {
                 _id: "$Station_Id_C", //分组依据
                 avgTemp: {$avg: "$TEM" },
                 sumPre: {$sum: "$PRE_1h" },
+                RHU: { $first: "$RHU" },
+                PRS: { $first: "$PRS" },
                 other: { $first: "$docs" }
             }
         }
