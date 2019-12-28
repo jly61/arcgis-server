@@ -22,6 +22,7 @@ var wheatsRouter = require('./routes/wheats');
 var citysRouter = require('./routes/citys');
 var cropsRouter = require('./routes/crops');
 var disastersRouter = require('./routes/disasters');
+var caiyunRouter = require('./routes/caiyun');
 var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -58,6 +59,7 @@ app.use('/wheats', wheatsRouter);
 app.use('/citys', citysRouter);
 app.use('/crops', cropsRouter);
 app.use('/disasters', disastersRouter);
+app.use('/caiyun', caiyunRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

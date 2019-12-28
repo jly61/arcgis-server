@@ -150,7 +150,7 @@ router.get('/kri-hour', (req, res, next) => {
     let month = parseInt(req.query.month);
     let day = parseInt(req.query.day);
     let hour = parseInt(req.query.hour);
-    console.log(month, day, hour)
+    // console.log(month, day, hour)
     Weathers.aggregate([
         {
             $match: {Year: year, Mon: month, Day: day, Hour: hour}
@@ -185,7 +185,7 @@ router.get('/kri-hour', (req, res, next) => {
         res.json({
             result: doc
         })
-        console.log(doc);
+        // console.log(doc);
     })
 });
 
