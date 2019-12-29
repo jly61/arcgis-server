@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios')
 
+// 解决js乘法运算
+function multi(num1, num2) {
+    const num1String = num1.toString()
+    const num2String = num2.toString()
+    const num1Digits = (num1String.split('.')[1] || '').length
+    const num2Digits = (num2String.split('.')[1] || '').length
+    const baseNum = Math.pow(10, num1Digits + num2Digits)
+    return Number(num1String.replace('.', '')) * Number(num2String.replace('.', '')) / baseNum
+}
+// 解决js乘法运算
+
 // 彩云预报每小时全站点
 router.post('/hour', function (req, res) {
     const points = req.body.points;
@@ -26,13 +37,26 @@ router.post('/hour', function (req, res) {
 
     async function renderPage() {
         let posts = await getPosts()
-        const tempArr = [];
+        const elementArr = [];
+        const tempList = []
+        const rainList = []
+        const humidityList = []
+        const presList = []
         for (let i = 0; i < posts.length; i++) {
             // console.log(posts[i].data.result.daily.temperature[0].avg)
-            tempArr.push(posts[i].data.result.hourly.temperature[0].value)
+            const data = posts[i].data.result.hourly
+            tempList.push(data.temperature[0].value)
+            rainList.push(data.precipitation[0].value)
+            humidityList.push(multi(data.humidity[0].value, 100))
+            presList.push((data.pres[0].value / 100).toFixed(2))
         }
-        console.log(tempArr)
-        res.send(tempArr)
+        console.log(elementArr)
+        res.send({
+            tempList: tempList,
+            rainList: rainList,
+            humidityList: humidityList,
+            presList: presList
+        })
     }
 
     renderPage()
@@ -78,6 +102,7 @@ router.post('/daily', function (req, res) {
 router.post('/frost', function (req, res) {
     const points = req.body.points;
     const time = req.body.time;
+
     function getPosts() {
         // 存储所有http请求
         let reqList = []
@@ -121,6 +146,7 @@ router.post('/frost', function (req, res) {
 router.post('/rain', function (req, res) {
     const points = req.body.points;
     const time = req.body.time;
+
     function getPosts() {
         // 存储所有http请求
         let reqList = []

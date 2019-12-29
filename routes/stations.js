@@ -4,7 +4,7 @@ const Stations = require('../models/stations');
 const Weathers = require('../models/weathers');
 // const hour_06260702 = require('../models/weathers');
 
-//查询站点表
+// 查询站点表
 router.get('/', (req, res, next) => {
     Stations.find({}, (err, doc) => {
         if (err) {
@@ -26,6 +26,34 @@ router.get('/', (req, res, next) => {
     })
 });
 
+// 查询单站点信息
+router.get('/info', (req, res) => {
+    let stationsName = req.query.stationName;
+    let params = {
+        Station_name: stationsName
+    };
+    Stations.findOne(params, (err, doc) => {
+        if (err) {
+            res.json({
+                status: 1,
+                msg: '查询站点信息失败',
+                result: ''
+            })
+        } else {
+            if (doc) {
+                res.json({
+                    status: 0,
+                    msg: '查询站点信息成功',
+                    result: {
+                        lon: doc.lon,
+                        lat: doc.lat
+                    }
+                });
+            }
+        }
+    })
+})
+
 //查询某个站点每小时的气温
 router.get('/hourWea', (req, res, next) => {
     let stationsName = req.query.stationName;
@@ -36,7 +64,6 @@ router.get('/hourWea', (req, res, next) => {
     };
     Stations.findOne(params, (err, doc) => {
         let station_id = doc.Station_Id_C;
-        console.log(typeof station_id);
         let weaParam = {
             'Station_Id_C': station_id,
             'Mon': month,
